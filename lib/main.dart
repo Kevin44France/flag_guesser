@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../pages/page1.dart';
+import '../pages/flaggl.dart';
 import '../pages/page2.dart';
 
 void main() {
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Page Principale'),
+      home: const MyHomePage(title: 'Menu Principal des Jeux'),
     );
   }
 }
@@ -27,10 +27,10 @@ class MyHomePage extends StatelessWidget {
 
   final String title;
 
-  void _navigateToPage1(BuildContext context) {
+  void _navigateToFlaggl(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Page1()),
+      MaterialPageRoute(builder: (context) => Flaggl()),
     );
   }
 
@@ -48,21 +48,66 @@ class MyHomePage extends StatelessWidget {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              child: const Text('Jeu 1'),
-              onPressed: () => _navigateToPage1(context),
-            ),
-            ElevatedButton(
-              child: const Text('Jeu 2'),
-              onPressed: () => _navigateToPage2(context),
-            ),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade100, Colors.blue.shade500],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              GameButton(
+                title: 'Flaggl',
+                icon: Icons.flag,
+                color: Colors.red,
+                onPressed: () => _navigateToFlaggl(context),
+              ),
+              const SizedBox(height: 20),
+              GameButton(
+                title: 'Jeu 2',
+                icon: Icons.gamepad,
+                color: Colors.green,
+                onPressed: () => _navigateToPage2(context),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+class GameButton extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onPressed;
+
+  const GameButton({
+    Key? key,
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      icon: Icon(icon, size: 30),
+      label: Text(title, style: const TextStyle(fontSize: 18)),
+      style: ElevatedButton.styleFrom(
+        primary: color,
+        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+      onPressed: onPressed,
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class Page1 extends StatelessWidget {
+class Flaggl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
