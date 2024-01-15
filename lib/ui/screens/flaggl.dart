@@ -132,7 +132,7 @@ class _FlagglState extends State<Flaggl> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Flaggl'),
-        backgroundColor: Colors.blue,
+        backgroundColor: const Color.fromARGB(216, 104, 159, 56),
       ),
       body: Center(
         child: isLoading
@@ -179,6 +179,7 @@ class _FlagglState extends State<Flaggl> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: fetchCountries,
+        backgroundColor: const Color.fromARGB(216, 104, 159, 56),
         tooltip: 'Fetch Random Country',
         child: const Icon(Icons.refresh),
       ),

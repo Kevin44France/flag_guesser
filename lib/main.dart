@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../ui/screens/flaggl.dart';
-import '../ui/screens/page2.dart';
+import '../ui/screens/find_flag.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +39,7 @@ class MyHomePage extends StatelessWidget {
   void _navigateToPage2(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Page2()),
+      MaterialPageRoute(builder: (context) => FindFlag()),
     );
   }
 
