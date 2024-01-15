@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/country.dart';
 
 class Page2 extends StatefulWidget {
@@ -14,6 +15,7 @@ class _Page2State extends State<Page2> {
   List<Country> countries = [];
   List<Country> choices = [];
   int score = 0;
+  int highScore = 0; // Variable pour stocker le score le plus élevé
   Country answer = Country(name: '', flagUrl: '');
   bool isLoading = false;
 
@@ -21,6 +23,14 @@ class _Page2State extends State<Page2> {
   void initState() {
     super.initState();
     fetchCountries();
+    loadHighScore(); // Charge le score le plus élevé au démarrage
+  }
+
+  Future<void> loadHighScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      highScore = prefs.getInt('highScore') ?? 0;
+    });
   }
 
   Future<void> fetchCountries() async {
@@ -38,7 +48,8 @@ class _Page2State extends State<Page2> {
         List<dynamic> data = jsonDecode(response.body);
         setState(() {
           countries = data
-              .map((json) => Country(
+              .map((json) =>
+              Country(
                   name: json['name']['shortnamelowercase'],
                   flagUrl: json['flag']['officialflag']['svg']))
               .toList();
@@ -76,7 +87,13 @@ class _Page2State extends State<Page2> {
 
   Future<void> checkValues(Country choice) async {
     if (choice == answer) {
-      setState(() => score++);
+      setState(() {
+        score++;
+        if (score > highScore) {
+          highScore = score;
+          saveHighScore(); // Sauvegardez le nouveau score le plus élevé
+        }
+      });
       await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -103,18 +120,23 @@ class _Page2State extends State<Page2> {
             title: const Text('Oops!'),
             content: const Text('Ce n\'est pas le bon drapeau!'),
             actions: <Widget>[
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
+            TextButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),]
+          ,
           );
         },
       );
     }
     setChoices();
+  }
+
+  void saveHighScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('highScore', highScore);
   }
 
   @override
@@ -127,66 +149,86 @@ class _Page2State extends State<Page2> {
       body: isLoading
           ? const CircularProgressIndicator()
           : choices.isNotEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'Devine le drapeau correspondant au pays!',
-                        style: Theme.of(context).textTheme.titleMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 60),
-                      Text(
-                        answer.name.toUpperCase(),
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 30),
-                      Expanded(
-                        child: GridView.builder(
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate:
-                              const SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 200,
-                            childAspectRatio: 3 / 2,
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                          ),
-                          itemCount: choices.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return GestureDetector(
-                              onTap: () => checkValues(choices[index]),
-                              child: Card(
-                                clipBehavior: Clip.antiAlias,
-                                elevation: 4.0,
-                                child: SvgPicture.network(
-                                  choices[index].flagUrl,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      Text(
-                        'Score: $score',
-                        style: Theme.of(context).textTheme.titleLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                )
-              : Center(
-                  child: Text(
-                    'Appuyez sur le bouton pour commencer le jeu',
-                    style: Theme.of(context).textTheme.titleLarge,
-                    textAlign: TextAlign.center,
-                  ),
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'Devine le drapeau correspondant au pays!',
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .titleMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 60),
+            Text(
+              answer.name.toUpperCase(),
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .headlineSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 30),
+            Expanded(
+              child: GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate:
+                const SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: 200,
+                  childAspectRatio: 3 / 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
                 ),
+                itemCount: choices.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return GestureDetector(
+                    onTap: () => checkValues(choices[index]),
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      elevation: 4.0,
+                      child: SvgPicture.network(
+                        choices[index].flagUrl,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Text(
+              'Score: $score',
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            Text( // Affichez le score le plus élevé
+              'Score le plus élevé: $highScore',
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .titleMedium,
+            ),
+          ],
+        ),
+      )
+          : Center(
+        child: Text(
+          'Appuyez sur le bouton pour commencer le jeu',
+          style: Theme
+              .of(context)
+              .textTheme
+              .titleLarge,
+          textAlign: TextAlign.center,
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: fetchCountries,
-        tooltip: 'Rafraîchir',
+        tooltip
+            : 'Rafraîchir',
         child: const Icon(Icons.refresh),
       ),
     );
