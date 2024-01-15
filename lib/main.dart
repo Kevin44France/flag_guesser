@@ -8,7 +8,7 @@ import 'blocs/score_cubit.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   PreferencesRepository preferencesRepository = PreferencesRepository();
-  final ScoreCubit scoreCubit = ScoreCubit(preferencesRepository);
+  final   ScoreCubit scoreCubit = ScoreCubit(preferencesRepository);
   scoreCubit.increment();
   runApp(BlocProvider<ScoreCubit>(
     create: (_) => scoreCubit, child: const MyApp()));
@@ -83,7 +83,7 @@ class MyHomePage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             GameButton(
-              title: 'Jeu 2',
+              title: 'Devine le drapeau',
               icon: Icons.gamepad,
               color: Colors.white,
               onPressed: () => _navigateToPage2(context),
