@@ -13,6 +13,7 @@ class Page2 extends StatefulWidget {
 class _Page2State extends State<Page2> {
   List<Country> countries = [];
   List<Country> choices = [];
+  int score = 0;
   Country answer = Country(name: '', flagUrl: '');
   bool isLoading = false;
 
@@ -75,6 +76,7 @@ class _Page2State extends State<Page2> {
 
   Future<void> checkValues(Country choice) async {
     if (choice == answer) {
+      setState(() => score++);
       await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -93,6 +95,7 @@ class _Page2State extends State<Page2> {
         },
       );
     } else {
+      setState(() => score = 0);
       await showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -130,16 +133,16 @@ class _Page2State extends State<Page2> {
                     children: <Widget>[
                       Text(
                         'Devine le drapeau correspondant au pays!',
-                        style: Theme.of(context).textTheme.headline6,
+                        style: Theme.of(context).textTheme.titleMedium,
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 60),
                       Text(
                         answer.name.toUpperCase(),
-                        style: Theme.of(context).textTheme.headline5,
+                        style: Theme.of(context).textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 30),
                       Expanded(
                         child: GridView.builder(
                           padding: const EdgeInsets.all(16),
@@ -166,13 +169,18 @@ class _Page2State extends State<Page2> {
                           },
                         ),
                       ),
+                      Text(
+                        'Score: $score',
+                        style: Theme.of(context).textTheme.titleLarge,
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 )
               : Center(
                   child: Text(
                     'Appuyez sur le bouton pour commencer le jeu',
-                    style: Theme.of(context).textTheme.headline6,
+                    style: Theme.of(context).textTheme.titleLarge,
                     textAlign: TextAlign.center,
                   ),
                 ),
