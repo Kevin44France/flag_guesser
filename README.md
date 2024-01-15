@@ -35,10 +35,15 @@ To run this project:
 4. Run `flutter pub get` to install the necessary dependencies.
 5. Launch the app using `flutter run` in your terminal.
 
-## Contribution
+## Amelioration axes 
 
-Contributions to enhance the app or add new features are welcome. Please feel free to fork the repository and submit pull requests.
+The API used is providing bad encoding for the country names, so we can do something about it to show all the countries names correctly.
 
----
+Another issue from the API is that it uses similar flags for different country, for exemple France and its former colonies.
 
-*This project is a fun way to learn about different countries and their flags, and it showcases the power of Flutter in creating engaging mobile applications.*
+## Versions
+
+Flutter 3.13.9
+
+Dart 3.1.5
+
