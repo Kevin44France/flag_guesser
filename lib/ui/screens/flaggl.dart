@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Flaggl extends StatefulWidget {
   @override
@@ -13,8 +14,28 @@ class _FlagglState extends State<Flaggl> {
   Map<String, dynamic>? randomCountry;
   bool isLoading = false;
   int score = 0;
-  List<String> countryNames = []; // Liste des noms de pays pour le select
-  String selectedCountry = ''; // Pays sélectionné
+  int highScoreFlaggl = 0; // Variable pour le meilleur score
+  List<String> countryNames = [];
+  String selectedCountry = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCountries();
+    loadHighScore();
+  }
+
+  Future<void> loadHighScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      highScoreFlaggl = prefs.getInt('highScoreFlaggl') ?? 0;
+    });
+  }
+
+  Future<void> saveHighScore() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('highScoreFlaggl', highScoreFlaggl);
+  }
 
   Future<void> fetchCountries() async {
     setState(() {
@@ -57,6 +78,10 @@ class _FlagglState extends State<Flaggl> {
         selectedCountry == randomCountry!['name']['shortnamelowercase']) {
       setState(() {
         score++;
+        if (score > highScoreFlaggl) {
+          highScoreFlaggl = score;
+          saveHighScore();
+        }
       });
       showDialog(
         context: context,
@@ -77,6 +102,9 @@ class _FlagglState extends State<Flaggl> {
         },
       );
     } else {
+      setState(() {
+        score = 0; // Réinitialiser le score
+      });
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -88,6 +116,7 @@ class _FlagglState extends State<Flaggl> {
                 child: const Text('OK'),
                 onPressed: () {
                   Navigator.of(context).pop();
+                  fetchCountries(); // Recharger un nouveau pays
                 },
               ),
             ],
@@ -95,17 +124,6 @@ class _FlagglState extends State<Flaggl> {
         },
       );
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchCountries();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -136,7 +154,8 @@ class _FlagglState extends State<Flaggl> {
                             return const Iterable<String>.empty();
                           }
                           return countryNames.where((String option) {
-                            return option.contains(textEditingValue.text);
+                            return option
+                                .contains(textEditingValue.text);
                           });
                         },
                         onSelected: (String selection) {
@@ -151,6 +170,8 @@ class _FlagglState extends State<Flaggl> {
                         child: const Text('Vérifier'),
                       ),
                       Text('Score: $score'),
+                      Text(
+                          'Meilleur score: $highScoreFlaggl'), // Afficher le meilleur score
                     ],
                   )
                 : const Text('Appuyez sur le bouton pour charger un pays'),
