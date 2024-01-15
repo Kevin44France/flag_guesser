@@ -89,10 +89,7 @@ class _Page2State extends State<Page2> {
     if (choice == answer) {
       setState(() {
         score++;
-        if (score > highScore) {
-          highScore = score;
-          saveHighScore(); // Sauvegardez le nouveau score le plus élevé
-        }
+
       });
       await showDialog(
         context: context,
@@ -112,7 +109,13 @@ class _Page2State extends State<Page2> {
         },
       );
     } else {
-      setState(() => score = 0);
+      setState(() {
+        if (score > highScore) {
+          highScore = score;
+          saveHighScore(); // Sauvegardez le nouveau score le plus élevé
+        }
+        score = 0;
+      });
       await showDialog(
         context: context,
         builder: (BuildContext context) {
