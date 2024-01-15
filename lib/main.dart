@@ -1,9 +1,17 @@
+import 'package:flag_guesser/repositories/preferences_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../ui/screens/flaggl.dart';
 import '../ui/screens/page2.dart';
+import 'blocs/score_cubit.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  PreferencesRepository preferencesRepository = PreferencesRepository();
+  final ScoreCubit scoreCubit = ScoreCubit(preferencesRepository);
+  scoreCubit.increment();
+  runApp(BlocProvider<ScoreCubit>(
+    create: (_) => scoreCubit, child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
