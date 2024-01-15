@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_svg/flutter_svg.dart'; // Import flutter_svg
 import 'dart:convert';
 
 class Flaggl extends StatefulWidget {
@@ -19,7 +20,7 @@ class _FlagglState extends State<Flaggl> {
 
     var url = Uri.parse('https://rest-countries10.p.rapidapi.com/countries');
     var headers = {
-      'X-RapidAPI-Key': '5ffebd22e0msh81794727dc35776p116ef2jsn0264b6e23bd5', // Replace with your API key
+      'X-RapidAPI-Key': '5ffebd22e0msh81794727dc35776p116ef2jsn0264b6e23bd5', // Replace with your actual API key
       'X-RapidAPI-Host': 'rest-countries10.p.rapidapi.com'
     };
 
@@ -54,7 +55,7 @@ class _FlagglState extends State<Flaggl> {
       ),
       body: Center(
         child: isLoading
-            ? CircularProgressIndicator() // Show loading indicator
+            ? const CircularProgressIndicator() // Show loading indicator
             : Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
@@ -67,13 +68,22 @@ class _FlagglState extends State<Flaggl> {
               child: const Text('Fetch Countries'),
               onPressed: fetchCountries,
             ),
-            Expanded( // Use Expanded to fill remaining space
-              child: ListView.builder( // Display countries in a list
+            Expanded(
+              child: ListView.builder(
                 itemCount: countries.length,
                 itemBuilder: (context, index) {
+                  // Access the SVG URL
+                  var flagUrl = countries[index]['flag']['officialflag']['svg'];
                   return ListTile(
-                    title: Text(countries[index]['name']), // Display country name
-                    leading: Image.network(countries[index]['flag']), // Display country flag
+                    title: Text(countries[index]['name']['shortnamelowercase']),
+                    leading: SvgPicture.network(
+                      flagUrl,
+                      placeholderBuilder: (BuildContext context) => Container(
+                          padding: const EdgeInsets.all(30.0),
+                          child: const CircularProgressIndicator()),
+                      width: 50, // Set your desired flag width
+                      height: 30, // Set your desired flag height
+                    ),
                   );
                 },
               ),
