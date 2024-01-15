@@ -151,7 +151,7 @@ class _FindFlagState extends State<FindFlag> {
         backgroundColor: const Color.fromARGB(216, 104, 159, 56),
       ),
       body: isLoading
-          ? const CircularProgressIndicator()
+          ? const Center(child: CircularProgressIndicator())
           : choices.isNotEmpty
               ? Center(
                   child: Column(
