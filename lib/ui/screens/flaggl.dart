@@ -78,10 +78,7 @@ class _FlagglState extends State<Flaggl> {
         selectedCountry == randomCountry!['name']['shortnamelowercase']) {
       setState(() {
         score++;
-        if (score > highScoreFlaggl) {
-          highScoreFlaggl = score;
-          saveHighScore();
-        }
+
       });
       showDialog(
         context: context,
@@ -103,6 +100,10 @@ class _FlagglState extends State<Flaggl> {
       );
     } else {
       setState(() {
+        if (score > highScoreFlaggl) {
+          highScoreFlaggl = score;
+          saveHighScore();
+        }
         score = 0; // Réinitialiser le score
       });
       showDialog(
