@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../pages/flaggl.dart';
-import '../pages/page2.dart';
+import '../ui/screens/flaggl.dart';
+import '../ui/screens/page2.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,9 +12,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Menu Principal des Jeux'),
@@ -44,37 +45,42 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-      ),
       body: Container(
+        width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade100, Colors.blue.shade500],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [Colors.green.shade200, Colors.black],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              GameButton(
-                title: 'Flaggl',
-                icon: Icons.flag,
-                color: Colors.red,
-                onPressed: () => _navigateToFlaggl(context),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
-              const SizedBox(height: 20),
-              GameButton(
-                title: 'Jeu 2',
-                icon: Icons.gamepad,
-                color: Colors.green,
-                onPressed: () => _navigateToPage2(context),
-              ),
-            ],
-          ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 40),
+            GameButton(
+              title: 'Flaggl',
+              icon: Icons.flag,
+              color: Colors.white,
+              onPressed: () => _navigateToFlaggl(context),
+            ),
+            const SizedBox(height: 20),
+            GameButton(
+              title: 'Jeu 2',
+              icon: Icons.gamepad,
+              color: Colors.white,
+              onPressed: () => _navigateToPage2(context),
+            ),
+          ],
         ),
       ),
     );
@@ -101,7 +107,7 @@ class GameButton extends StatelessWidget {
       icon: Icon(icon, size: 30),
       label: Text(title, style: const TextStyle(fontSize: 18)),
       style: ElevatedButton.styleFrom(
-        primary: color,
+        backgroundColor: color,
         padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),
