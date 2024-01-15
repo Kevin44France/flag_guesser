@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flag_guesser/models/country.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_svg/flutter_svg.dart';
@@ -11,11 +12,12 @@ class Flaggl extends StatefulWidget {
 }
 
 class _FlagglState extends State<Flaggl> {
-  Map<String, dynamic>? randomCountry;
+  List<Country> countries = [];
+  List<String> countryNames = [];
+  Country answer = Country(name: '', flagUrl: '');
   bool isLoading = false;
   int score = 0;
   int highScoreFlaggl = 0; // Variable pour le meilleur score
-  List<String> countryNames = [];
   String selectedCountry = '';
 
   @override
@@ -38,47 +40,53 @@ class _FlagglState extends State<Flaggl> {
   }
 
   Future<void> fetchCountries() async {
-    setState(() {
-      isLoading = true;
-    });
+    if(countries.isEmpty){
+      setState(() => isLoading = true);
+      var url = Uri.parse('https://rest-countries10.p.rapidapi.com/countries');
+      var headers = {
+        'X-RapidAPI-Key': '5ffebd22e0msh81794727dc35776p116ef2jsn0264b6e23bd5',
+        'X-RapidAPI-Host': 'rest-countries10.p.rapidapi.com'
+      };
 
-    var url = Uri.parse('https://rest-countries10.p.rapidapi.com/countries');
-    var headers = {
-      'X-RapidAPI-Key': '5ffebd22e0msh81794727dc35776p116ef2jsn0264b6e23bd5',
-      'X-RapidAPI-Host': 'rest-countries10.p.rapidapi.com'
-    };
-
-    try {
-      var response = await http.get(url, headers: headers);
-      if (response.statusCode == 200) {
-        List data = jsonDecode(response.body);
-        countryNames = data
-            .map<String>((country) => country['name']['shortnamelowercase'])
-            .toList();
-        setState(() {
-          randomCountry = data[Random().nextInt(data.length)];
-          isLoading = false;
-        });
-      } else {
-        print('Échec de la requête avec le statut : ${response.statusCode}.');
+      try {
+        var response = await http.get(url, headers: headers);
+        if (response.statusCode == 200) {
+          List data = jsonDecode(response.body);
+          setState(() {
+            countries = data
+                .map((json) => Country(
+                    name: json['name']['shortnamelowercase'],
+                    flagUrl: json['flag']['officialflag']['svg']))
+                .toList();
+            countryNames = countries.map((country) => country.name).toList();
+          });
+          setState(() => isLoading = false);
+        } else {
+          print('Échec de la requête avec le statut : ${response.statusCode}.');
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } catch (e) {
+        print('Erreur: $e');
         setState(() {
           isLoading = false;
         });
       }
-    } catch (e) {
-      print('Erreur: $e');
-      setState(() {
-        isLoading = false;
-      });
     }
+    setGuess();
+  }
+
+  setGuess(){
+    setState((){
+      answer = countries[Random().nextInt(countries.length)];
+    });
   }
 
   void checkGuess() {
-    if (randomCountry != null &&
-        selectedCountry == randomCountry!['name']['shortnamelowercase']) {
+    if (selectedCountry == answer.name) {
       setState(() {
         score++;
-
       });
       showDialog(
         context: context,
@@ -137,12 +145,12 @@ class _FlagglState extends State<Flaggl> {
       body: Center(
         child: isLoading
             ? const CircularProgressIndicator()
-            : randomCountry != null
+            : countries.isNotEmpty
                 ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       SvgPicture.network(
-                        randomCountry!['flag']['officialflag']['svg'],
+                        answer.flagUrl,
                         placeholderBuilder: (BuildContext context) =>
                             const CircularProgressIndicator(),
                         width: 200.0,
