@@ -1,6 +1,7 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_svg/flutter_svg.dart'; // Import flutter_svg
+import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:convert';
 
 class Flaggl extends StatefulWidget {
@@ -9,41 +10,102 @@ class Flaggl extends StatefulWidget {
 }
 
 class _FlagglState extends State<Flaggl> {
-  List countries = []; // Added to store countries data
-  bool isLoading = false; // Added to handle loading state
+  Map<String, dynamic>? randomCountry;
+  bool isLoading = false;
+  int score = 0;
+  List<String> countryNames = []; // Liste des noms de pays pour le select
+  String selectedCountry = ''; // Pays sélectionné
 
-  // Function to fetch countries
   Future<void> fetchCountries() async {
     setState(() {
-      isLoading = true; // Start loading
+      isLoading = true;
     });
 
     var url = Uri.parse('https://rest-countries10.p.rapidapi.com/countries');
     var headers = {
-      'X-RapidAPI-Key': '5ffebd22e0msh81794727dc35776p116ef2jsn0264b6e23bd5', // Replace with your actual API key
+      'X-RapidAPI-Key': '5ffebd22e0msh81794727dc35776p116ef2jsn0264b6e23bd5',
       'X-RapidAPI-Host': 'rest-countries10.p.rapidapi.com'
     };
 
     try {
       var response = await http.get(url, headers: headers);
       if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
+        List data = jsonDecode(response.body);
+        countryNames = data
+            .map<String>((country) => country['name']['shortnamelowercase'])
+            .toList();
         setState(() {
-          countries = data; // Update countries data
-          isLoading = false; // Stop loading
+          randomCountry = data[Random().nextInt(data.length)];
+          isLoading = false;
         });
       } else {
-        print('Request failed with status: ${response.statusCode}.');
+        print('Échec de la requête avec le statut : ${response.statusCode}.');
         setState(() {
-          isLoading = false; // Stop loading on error
+          isLoading = false;
         });
       }
     } catch (e) {
-      print('Error: $e');
+      print('Erreur: $e');
       setState(() {
-        isLoading = false; // Stop loading on exception
+        isLoading = false;
       });
     }
+  }
+
+  void checkGuess() {
+    if (randomCountry != null &&
+        selectedCountry == randomCountry!['name']['shortnamelowercase']) {
+      setState(() {
+        score++;
+      });
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Bravo !'),
+            content: const Text('Bonne réponse !'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  fetchCountries();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Oops !'),
+            content: const Text('Mauvaise réponse. Réessayez !'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCountries();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -55,48 +117,51 @@ class _FlagglState extends State<Flaggl> {
       ),
       body: Center(
         child: isLoading
-            ? const CircularProgressIndicator() // Show loading indicator
-            : Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'Devine le pays!',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              child: const Text('Fetch Countries'),
-              onPressed: fetchCountries,
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: countries.length,
-                itemBuilder: (context, index) {
-                  // Access the SVG URL
-                  var flagUrl = countries[index]['flag']['officialflag']['svg'];
-                  return ListTile(
-                    title: Text(countries[index]['name']['shortnamelowercase']),
-                    leading: SvgPicture.network(
-                      flagUrl,
-                      placeholderBuilder: (BuildContext context) => Container(
-                          padding: const EdgeInsets.all(30.0),
-                          child: const CircularProgressIndicator()),
-                      width: 50, // Set your desired flag width
-                      height: 30, // Set your desired flag height
-                    ),
-                  );
-                },
-              ),
-            ),
-            ElevatedButton(
-              child: const Text('Retour au Menu Principal'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
+            ? const CircularProgressIndicator()
+            : randomCountry != null
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      SvgPicture.network(
+                        randomCountry!['flag']['officialflag']['svg'],
+                        placeholderBuilder: (BuildContext context) =>
+                            const CircularProgressIndicator(),
+                        width: 200.0,
+                        height: 100.0,
+                      ),
+                      const SizedBox(height: 20),
+                      Autocomplete<String>(
+                        optionsBuilder: (TextEditingValue textEditingValue) {
+                          if (textEditingValue.text == '') {
+                            return const Iterable<String>.empty();
+                          }
+                          return countryNames.where((String option) {
+                            return option.contains(textEditingValue.text);
+                          });
+                        },
+                        onSelected: (String selection) {
+                          setState(() {
+                            selectedCountry = selection;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: checkGuess,
+                        child: const Text('Vérifier'),
+                      ),
+                      Text('Score: $score'),
+                    ],
+                  )
+                : const Text('Appuyez sur le bouton pour charger un pays'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: fetchCountries,
+        tooltip: 'Fetch Random Country',
+        child: const Icon(Icons.refresh),
       ),
     );
   }
 }
+
+void main() => runApp(MaterialApp(home: Flaggl()));
